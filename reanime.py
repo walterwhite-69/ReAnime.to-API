@@ -145,14 +145,14 @@ async def search(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ):
-    return await _get("/api/search", {"q": q, "limit": limit, "offset": offset})
+    return await _get("/api/v1/search", {"q": q, "limit": limit, "offset": offset})
 
 
 @app.get("/home")
 async def home(limit: int = Query(20, ge=1, le=100)):
     latest, top = await asyncio.gather(
-        _get("/api/home/latest-aired", {"limit": limit}),
-        _get("/api/top/anime", {"period": "week", "limit": limit}),
+        _get("/api/v1/home/latest-aired", {"limit": limit}),
+        _get("/api/v1/top/anime", {"period": "week", "limit": limit}),
     )
     return {"latest_aired": latest, "top_weekly": top}
 
@@ -162,29 +162,28 @@ async def top(
     period: str = Query("week", pattern="^(day|week|month)$"),
     limit: int = Query(20, ge=1, le=100),
 ):
-    return await _get("/api/top/anime", {"period": period, "limit": limit})
+    return await _get("/api/v1/top/anime", {"period": period, "limit": limit})
 
 
 @app.get("/schedule")
 async def schedule():
-    return await _get("/api/schedule")
+    return await _get("/api/v1/schedule")
 
 
 @app.get("/info/{slug}")
 async def anime_info(slug: str):
-    meta, eps = await asyncio.gather(
-        _get(f"/api/watch/{slug}/1"),
-        _get(f"/api/episodes/{slug}"),
+    anime, eps = await asyncio.gather(
+        _get(f"/api/v1/anime/{slug}"),
+        _get(f"/api/v1/anime/{slug}/episodes", {"limit": 2000}),
     )
-    anime = meta.get("anime") or {}
-    anilist_id = _anilist_from_anime(anime)
+    anilist_id = anime.get("anilist_id") or _anilist_from_anime(anime)
     ep_list = eps if isinstance(eps, list) else eps.get("data", eps.get("episodes", []))
     return {**anime, "episodes": ep_list, "anilist_id": anilist_id}
 
 
 @app.get("/episodes/{slug}")
 async def episodes(slug: str):
-    data = await _get(f"/api/episodes/{slug}")
+    data = await _get(f"/api/v1/anime/{slug}/episodes", {"limit": 2000})
     return data if isinstance(data, list) else data.get("data", data.get("episodes", data))
 
 
@@ -213,7 +212,7 @@ async def thumbnails(anilist_id: int):
 
 @app.get("/recommendations/{slug}")
 async def recommendations(slug: str):
-    return await _get(f"/api/anime/{slug}/recommendations")
+    return await _get(f"/api/v1/anime/{slug}/recommendations")
 
 
 if __name__ == "__main__":
