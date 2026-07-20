@@ -85,7 +85,7 @@ async def get_stream_url(access_id: str, v: int = 2) -> dict:
 
 
 async def _servers(slug: str, ep: int, anilist_id: Optional[int] = None) -> dict:
-    watch = await _get(f"/api/watch/{slug}/{ep}")
+    watch = await _get(f"/api/v1/watch/{slug}", {"ep": ep})
     aid = anilist_id or _anilist_from_anime(watch.get("anime"))
 
     flix: dict = {}
