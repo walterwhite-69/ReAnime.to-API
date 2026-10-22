@@ -1,3 +1,6 @@
+## Move to this api 
+https://github.com/walterwhite-69/Anivexa-API/
+
 # reanime-scraper
 
 A self-hosted anime streaming API that scrapes [reanime.to](https://reanime.to) and fully decrypts [flixcloud.cc](https://flixcloud.cc) HLS streams. Works as a drop-in alternative to Consumet. No headless browsers — pure Python + Node.js.
